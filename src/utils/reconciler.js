@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { fiberState } from "./fiberState.js";
 import { commitRoot } from "./commit.js";
+import { isEvent, isProperty, eventType } from "./domUtils.js";
 function render(element, container) {
   fiberState.nextUnitOfWork = {
     dom: container,
@@ -114,9 +115,6 @@ function performUnitOfWork(fiber) {
   }
 }
 
-const isEvent = (key) => key.startsWith("on");
-const isProperty = (key) => key !== "children" && !isEvent(key);
-const eventType = (key) => key.substring(2).toLowerCase();
 function createDom(fiber) {
   const dom =
     fiber.type === "TEXT_ELEMENT"

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { fiberState } from "./fiberState.js";
-
+import { isEvent, isProperty, eventType } from "./domUtils.js";
 export function commitRoot() {
   const root = fiberState.wipFiber;
   if (!root) return;
