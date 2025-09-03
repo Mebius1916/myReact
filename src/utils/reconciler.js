@@ -1,33 +1,33 @@
 // @ts-nocheck
-import { fiberState } from "./fiberState.js";
+import { fiberState, getNextUnitOfWork, setNextUnitOfWork, getOldRoot, setWipFiber, pushDeletion } from "./fiberState.js";
 import { commitRoot } from "./commit.js";
 import { isEvent, isProperty, eventType } from "./domUtils.js";
 function render(element, container) {
-  fiberState.nextUnitOfWork = {
+  setNextUnitOfWork({
     dom: container,
     props: {
       children: [element],
     },
-  };
+  });
   // wipFiber指向当前fiber树的根节点
-  fiberState.wipFiber = fiberState.nextUnitOfWork;
+  setWipFiber(getNextUnitOfWork());
 }
 
 export function update(){
-  fiberState.nextUnitOfWork = {
-    ...fiberState.currentRoot,
-    alternate: fiberState.currentRoot,
-  }
-  fiberState.wipFiber = fiberState.nextUnitOfWork;
+  setNextUnitOfWork({
+    ...getOldRoot(),
+    alternate: getOldRoot(),
+  })
+  setWipFiber(getNextUnitOfWork());
 }
 
 function workLoop(deadling) {
   let shouldYield = false;
-  while (fiberState.nextUnitOfWork && !shouldYield) {
-    fiberState.nextUnitOfWork = performUnitOfWork(fiberState.nextUnitOfWork);
+  while (getNextUnitOfWork() && !shouldYield) {
+    setNextUnitOfWork(performUnitOfWork(getNextUnitOfWork()));
     shouldYield = deadling.timeRemaining() < 1;
   }
-  if (!fiberState.nextUnitOfWork) {
+  if (!getNextUnitOfWork()) {
     commitRoot();
   }
   requestIdleCallback(workLoop);
@@ -81,7 +81,7 @@ function reconcileChildren(fiber, elements = []) {
     }
     if(oldFiber && !sameType){
       oldFiber.effectTag = "DELETION";
-      fiberState.deletions.push(oldFiber);
+      pushDeletion(oldFiber);
     }
     if(oldFiber){
       oldFiber = oldFiber.sibling;

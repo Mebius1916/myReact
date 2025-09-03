@@ -1,14 +1,14 @@
 // @ts-nocheck
-import { fiberState } from "./fiberState.js";
+import { getWipFiber, getDeletions, setOldRoot, setWipFiber, clearDeletions } from "./fiberState.js";
 import { isEvent, isProperty, eventType } from "./domUtils.js";
 export function commitRoot() {
-  const root = fiberState.wipFiber;
+  const root = getWipFiber();
   if (!root) return;
-  fiberState.deletions.forEach(commitWork)
+  getDeletions().forEach(commitWork)
   commitWork(root.child);
-  fiberState.currentRoot = root;
-  fiberState.wipFiber = undefined;
-  fiberState.deletions = [];
+  setOldRoot(root);
+  setWipFiber(undefined);
+  clearDeletions();
 }
 
 function commitWork(fiber) {
