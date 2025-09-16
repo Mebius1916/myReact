@@ -1,10 +1,10 @@
-import React, { update } from "./react";
+import React from "./react";
+import { useState } from "./hooks/useState";
 
-let a = 1;
 function App(){
+  const [a, setA] = useState(1);
   const handle = () => {
-    a++;
-    update();
+    setA(v => v + 1);
   }
   return (
     <div>

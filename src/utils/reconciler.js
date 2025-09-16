@@ -21,6 +21,17 @@ export function update(){
   setWipFiber(getNextUnitOfWork());
 }
 
+// 批量调度：将多次 setState 合并到同一微任务中
+let updateScheduled = false;
+export function scheduleUpdate(){
+  if(updateScheduled) return;
+  updateScheduled = true;
+  Promise.resolve().then(() => {
+    updateScheduled = false;
+    update();
+  });
+}
+
 function workLoop(deadling) {
   let shouldYield = false;
   while (getNextUnitOfWork() && !shouldYield) {
@@ -36,6 +47,9 @@ function workLoop(deadling) {
 requestIdleCallback(workLoop);
 
 function updateFunctionComponent(fiber){
+  fiber.hooks = [];
+  fiber.hookIndex = 0;
+  setWipFiber(fiber);
   fiber.props.children = [fiber.type(fiber.props)];
   reconcileChildren(fiber,fiber.props.children);
 }
@@ -51,6 +65,7 @@ function reconcileChildren(fiber, elements = []) {
   let oldFiber = fiber.alternate && fiber.alternate.child;
   let index = 0;
   let prevSibling;
+  // 层序优先遍历
   while (index < elements.length || oldFiber) {
     const element = elements[index];
     const sameType = oldFiber && element && oldFiber.type === element.type;
