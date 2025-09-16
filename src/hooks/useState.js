@@ -3,7 +3,6 @@ import { scheduleUpdate } from "../utils/reconciler";
 
 export function useState(initValue){
   const wipFiber = getWipFiber();
-  console.log(wipFiber);
   const alternate = wipFiber?.alternate;
   const hookIndex = wipFiber?.hookIndex ?? 0;
   const oldHook = alternate?.hooks?.[hookIndex];
@@ -18,18 +17,16 @@ export function useState(initValue){
     if (Object.is(nextState, hook.state)) return;
     hook.state = nextState;
   });
-  actions.length = 0;
+
   const setState = (action) => {
     hook.queue.push(action);
     // 批量：合并到微任务，避免多次重复更新
     scheduleUpdate();
   }
-  const newFiber = getWipFiber();
-  if(!newFiber){
-    throw new Error("useState must be called during a function component render");
-  }
-  newFiber.hooks.push(hook);
-  newFiber.hookIndex = hookIndex + 1;
-  setWipFiber(newFiber);
+
+  wipFiber.hooks.push(hook);
+  wipFiber.hookIndex = hookIndex + 1;
+  setWipFiber(wipFiber);
+
   return [hook.state, setState];
 }
