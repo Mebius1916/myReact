@@ -20,7 +20,8 @@ function createElement(type, props, ...children) {
   };
 }
 
-import { render, update } from "./utils/reconciler";
+import { render } from "./utils/renderer";
+import { update } from "./utils/scheduler";
 export default {
   createElement,
   render,

@@ -1,7 +1,8 @@
 // @ts-nocheck
-import { fiberState, getNextUnitOfWork, setNextUnitOfWork, getOldRoot, setWipFiber, pushDeletion } from "./fiberState.js";
+import { getNextUnitOfWork, setNextUnitOfWork, setWipFiber, pushDeletion, setWipRoot } from "./fiberState.js";
 import { commitRoot } from "./commit.js";
 import { isEvent, isProperty, eventType } from "./domUtils.js";
+
 function render(element, container) {
   setNextUnitOfWork({
     dom: container,
@@ -9,46 +10,15 @@ function render(element, container) {
       children: [element],
     },
   });
+  setWipRoot(getNextUnitOfWork());
   // wipFiber指向当前fiber树的根节点
   setWipFiber(getNextUnitOfWork());
 }
 
-export function update(){
-  setNextUnitOfWork({
-    ...getOldRoot(),
-    alternate: getOldRoot(),
-  })
-  setWipFiber(getNextUnitOfWork());
-}
-
-// 批量调度：将多次 setState 合并到同一微任务中
-let updateScheduled = false;
-export function scheduleUpdate(){
-  if(updateScheduled) return;
-  updateScheduled = true;
-  Promise.resolve().then(() => {
-    updateScheduled = false;
-    update();
-  });
-}
-
-function workLoop(deadling) {
-  let shouldYield = false;
-  while (getNextUnitOfWork() && !shouldYield) {
-    setNextUnitOfWork(performUnitOfWork(getNextUnitOfWork()));
-    shouldYield = deadling.timeRemaining() < 1;
-  }
-  if (!getNextUnitOfWork()) {
-    commitRoot();
-  }
-  requestIdleCallback(workLoop);
-}
-
-requestIdleCallback(workLoop);
-
 function updateFunctionComponent(fiber){
   fiber.hooks = [];
   fiber.hookIndex = 0;
+  fiber.effect = [];
   setWipFiber(fiber);
   fiber.props.children = [fiber.type(fiber.props)];
   reconcileChildren(fiber,fiber.props.children);
@@ -146,5 +116,6 @@ function createDom(fiber) {
   return dom;
 }
 
-export { render };
+export { render, performUnitOfWork };
+
 

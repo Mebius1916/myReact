@@ -1,6 +1,7 @@
 export const fiberState = {
   nextUnitOfWork: undefined, //当前正在执行的fiber节点
-  wipFiber: undefined, // 新fiber树的根节点
+  wipFiber: undefined, // 当前正在渲染的函数组件 fiber（用于 hooks）
+  wipRoot: undefined, // 本次渲染的根 fiber
   oldRoot: undefined, // 旧fiber树的根节点
   deletions: [], // 需要删除的fiber节点
 };
@@ -16,6 +17,13 @@ export const setNextUnitOfWork = (value) => {
 export const getWipFiber = () => fiberState.wipFiber;
 export const setWipFiber = (value) => {
   fiberState.wipFiber = value;
+  return value;
+};
+
+// wipRoot
+export const getWipRoot = () => fiberState.wipRoot;
+export const setWipRoot = (value) => {
+  fiberState.wipRoot = value;
   return value;
 };
 
