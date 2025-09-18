@@ -11,13 +11,14 @@ function render(element, container) {
     },
   });
   setWipRoot(getNextUnitOfWork());
-  // wipFiber指向当前fiber树的根节点
   setWipFiber(getNextUnitOfWork());
 }
 
 function updateFunctionComponent(fiber){
-  fiber.hooks = [];
-  fiber.hookIndex = 0;
+  // 使用链表管理 hooks
+  fiber.headState = null; // 当前链表头
+  fiber.lastHook = null; // 当前链表尾
+  fiber.nextOldHook = fiber.alternate?.headState || null; // 移动指针
   fiber.effect = [];
   setWipFiber(fiber);
   fiber.props.children = [fiber.type(fiber.props)];
