@@ -21,7 +21,7 @@ function createElement(type, props, ...children) {
 }
 
 import { render } from "./utils/renderer";
-import { update, startTransition } from "./utils/scheduler";
+import { update, startTransition } from "./utils/scheduler.js";
 export default {
   createElement,
   render,

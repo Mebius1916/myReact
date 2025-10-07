@@ -1,5 +1,5 @@
 import { getWipFiber, setWipFiber } from "../utils/fiberState";
-import { scheduleUpdate } from "../utils/scheduler";
+import { scheduleUpdate } from "../utils/scheduler.js";
 
 export function useState(initValue){
   const wipFiber = getWipFiber();
