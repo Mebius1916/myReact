@@ -36,11 +36,13 @@ function reconcileChildren(fiber, elements = []) {
   let oldFiber = fiber.alternate && fiber.alternate.child;
   let index = 0;
   let prevSibling;
+  
   // 层序优先遍历
   while (index < elements.length || oldFiber) {
     const element = elements[index];
     const sameType = oldFiber && element && oldFiber.type === element.type;
     let newFiber;
+    
     if(sameType){
       newFiber = {
         type: oldFiber.type,
@@ -53,6 +55,7 @@ function reconcileChildren(fiber, elements = []) {
         effectTag: "UPDATE",
       };
     }
+    
     if(element && !sameType){
       newFiber = {
         type: element.type,
@@ -65,19 +68,25 @@ function reconcileChildren(fiber, elements = []) {
         effectTag: "PLACEMENT",
       };
     }
+    
     if(oldFiber && !sameType){
       oldFiber.effectTag = "DELETION";
       pushDeletion(oldFiber);
     }
+    
     if(oldFiber){
       oldFiber = oldFiber.sibling;
     }
+    
     if (index === 0) {
       fiber.child = newFiber;
-    } else if (prevSibling) {
+    } else if (prevSibling && newFiber) {
       prevSibling.sibling = newFiber;
     }
-    prevSibling = newFiber;
+    
+    if (newFiber) {
+       prevSibling = newFiber;
+     }
     index++;
   }
 }

@@ -20,6 +20,7 @@ export function useState(initValue){
       newHook.state = nextState;
     }
   });
+  newHook.queue = [];
 
   const setState = (action) => {
     newHook.queue.push(action);

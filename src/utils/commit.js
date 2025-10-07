@@ -58,15 +58,18 @@ function commitWork(fiber) {
     parentFiber = parentFiber.parent;
   }
   const parentDom = parentFiber?.dom;
+  
   if(fiber.effectTag === "DELETION"){
     commitDeletion(fiber, parentDom);
     return;
   }
+  
   if(fiber.effectTag === "UPDATE" && fiber.dom){
-    updateDom(fiber.dom, fiber.alternate.props, fiber.props);
+    updateDom(fiber.dom, fiber.alternate?.props, fiber.props);
   }
+  
   if (fiber.effectTag === "PLACEMENT" && fiber.dom) {
-    if (parentDom) {
+    if (parentDom && !parentDom.contains(fiber.dom)) {
       parentDom.append(fiber.dom);
     }
   }
@@ -87,7 +90,10 @@ function commitDeletion(fiber, parentDom) {
   // 卸载前先清理整个子树的 effect
   cleanupEffectsRecursively(fiber);
   if (fiber.dom) {
-    parentDom.removeChild(fiber.dom);
+    // 检查节点是否确实是父节点的子节点
+    if (parentDom && parentDom.contains(fiber.dom)) {
+      parentDom.removeChild(fiber.dom);
+    }
   } else {
     commitDeletion(fiber.child, parentDom);
   }
@@ -95,6 +101,8 @@ function commitDeletion(fiber, parentDom) {
 const isGone = (prev, next) => (key) => !(key in next);
 const isNew = (prev, next) => (key) => prev[key] !== next[key];
 function updateDom(dom, prevProps, nextProps) {
+  prevProps = prevProps || {};
+  nextProps = nextProps || {};
   // 删除旧的属性
   Object.keys(prevProps)
     .filter(isProperty)
